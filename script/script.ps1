@@ -1,0 +1,1 @@
+dotnet run --project $args[0] $args[1]
