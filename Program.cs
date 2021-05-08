@@ -74,6 +74,10 @@ namespace appointment_checker
             {
                 TriggerFound();
             }
+            else
+            {                
+                Console.WriteLine($"=> none :(");
+            }
         }
         private static void TriggerFound(string param = "")
         {
