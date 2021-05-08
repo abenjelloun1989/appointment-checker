@@ -14,13 +14,13 @@ namespace appointment_checker
         private static readonly HttpClient _client = new HttpClient();
         public static async Task Main(string[] args)
         {            
-            if (args.Count() > 0 && args[0] == "candilib")
+            if (args.Count() > 0)
             {
-                await ProcessCandilib();
-            }
-            else if (args.Count() > 0 && args[0] == "wedding")
-            {
-                await ProcessWedding();
+                switch (args[0])
+                {
+                    case "candilib" : { await ProcessCandilib(); break; }
+                    case "wedding" : { await ProcessWedding(); break; }
+                }                
             }   
         }
         private static async Task ProcessCandilib()
