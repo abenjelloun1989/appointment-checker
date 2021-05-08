@@ -1,1 +1,1 @@
-dotnet run --project $args[0] $args[1]
+dotnet run --project 'D:\gitroot\appointment-checker' $args[0]
