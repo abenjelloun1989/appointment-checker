@@ -83,7 +83,7 @@ namespace appointment_checker
             var stringContent = await response.Content.ReadAsStringAsync();
             if (stringContent != "[]")
             {
-                SendEmailNotification("success", stringContent);
+                SendEmailNotification("!! SUCCESS !!", stringContent);
             }
             else
             {       
