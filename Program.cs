@@ -92,8 +92,13 @@ namespace appointment_checker
 
         private static void SendEmailNotification(string subject, string body)
         {
-            var smtpClient = new SmtpClient();
             var config = ConfigurationManager.AppSettings;
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential(config["EmailSender"], config["EmailSenderPassword"]),
+                EnableSsl = true,
+            };
                 
             smtpClient.Send(config["EmailSender"], 
                             config["EmailReceiver"],
