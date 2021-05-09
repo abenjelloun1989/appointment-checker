@@ -2,8 +2,10 @@
 using System.Configuration;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using appointment_checker.models;
 
@@ -12,11 +14,13 @@ namespace appointment_checker
     class Program
     {
         private static readonly HttpClient _client = new HttpClient();
+        private static string _context;
         public static async Task Main(string[] args)
         {
             if (args.Count() > 0)
             {
-                switch (args[0])
+                _context = args[0];
+                switch (_context)
                 {
                     case "candilib" : { await ProcessCandilib(); break; }
                     case "wedding" : { await ProcessWedding(); break; }
@@ -41,7 +45,7 @@ namespace appointment_checker
 
                 if (res.Count > 0 && res.Any(r => r.count > 0))
                 {
-                    TriggerFound(dep);
+                    SendEmailNotification(_context, dep);
                 }
                 else
                 {
@@ -72,10 +76,10 @@ namespace appointment_checker
             var stringContent = await response.Content.ReadAsStringAsync();
             if (stringContent != "[]")
             {
-                TriggerFound();
+                SendEmailNotification(_context, stringContent);
             }
             else
-            {                
+            {       
                 Console.WriteLine($"=> none :(");
             }
         }
@@ -84,6 +88,18 @@ namespace appointment_checker
             Console.WriteLine($"{param} => YES !");
             Console.Beep();
             Console.ReadLine();
+        }
+
+        private static void SendEmailNotification(string subject, string body)
+        {
+            var smtpClient = new SmtpClient();
+            var config = ConfigurationManager.AppSettings;
+                
+            smtpClient.Send(config["EmailSender"], 
+                            config["EmailReceiver"],
+                            $"Appointment Checker : {subject}",
+                            $"{subject} appointment found. Here is the response content: {body}");
+
         }
     }
 }
