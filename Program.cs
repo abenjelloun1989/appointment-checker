@@ -13,7 +13,7 @@ namespace appointment_checker
     {
         private static readonly HttpClient _client = new HttpClient();
         public static async Task Main(string[] args)
-        {            
+        {
             if (args.Count() > 0)
             {
                 switch (args[0])
