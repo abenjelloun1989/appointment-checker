@@ -20,11 +20,18 @@ namespace appointment_checker
             if (args.Count() > 0)
             {
                 _context = args[0];
-                switch (_context)
+                try
+                {                    
+                    switch (_context)
+                    {
+                        case "candilib" : { await ProcessCandilib(); break; }
+                        case "wedding" : { await ProcessWedding(); break; }
+                    }      
+                }
+                catch (System.Exception ex)
                 {
-                    case "candilib" : { await ProcessCandilib(); break; }
-                    case "wedding" : { await ProcessWedding(); break; }
-                }                
+                    SendEmailNotification("error", ex.Message);
+                }          
             }   
         }
         private static async Task ProcessCandilib()
@@ -45,7 +52,7 @@ namespace appointment_checker
 
                 if (res.Count > 0 && res.Any(r => r.count > 0))
                 {
-                    SendEmailNotification(_context, dep);
+                    SendEmailNotification("success", dep);
                 }
                 else
                 {
@@ -76,7 +83,7 @@ namespace appointment_checker
             var stringContent = await response.Content.ReadAsStringAsync();
             if (stringContent != "[]")
             {
-                SendEmailNotification(_context, stringContent);
+                SendEmailNotification("success", stringContent);
             }
             else
             {       
@@ -90,7 +97,7 @@ namespace appointment_checker
             Console.ReadLine();
         }
 
-        private static void SendEmailNotification(string subject, string body)
+        private static void SendEmailNotification(string status, string body)
         {
             var config = ConfigurationManager.AppSettings;
             var smtpClient = new SmtpClient("smtp.gmail.com")
@@ -102,8 +109,8 @@ namespace appointment_checker
                 
             smtpClient.Send(config["EmailSender"], 
                             config["EmailReceiver"],
-                            $"Appointment Checker : {subject}",
-                            $"{subject} appointment found. Here is the response content: {body}");
+                            $"Appointment Checker {_context} : {status}",
+                            $"{_context} response : {body}");
 
         }
     }
