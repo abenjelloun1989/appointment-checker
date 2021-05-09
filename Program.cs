@@ -30,7 +30,7 @@ namespace appointment_checker
                 }
                 catch (System.Exception ex)
                 {
-                    SendEmailNotification("error", ex.Message);
+                    SendEmailNotification("ERROR", ex.Message);
                 }          
             }   
         }
@@ -52,7 +52,7 @@ namespace appointment_checker
 
                 if (res.Count > 0 && res.Any(r => r.count > 0))
                 {
-                    SendEmailNotification("success", dep);
+                    SendEmailNotification("!! SUCCESS !!", dep);
                 }
                 else
                 {
