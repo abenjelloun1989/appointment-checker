@@ -26,6 +26,7 @@ namespace appointment_checker
                     {
                         case "candilib" : { await ProcessCandilib(); break; }
                         case "wedding" : { await ProcessWedding(); break; }
+                        case "vaccin" : { await ProcessVaccin(); break; }
                     }      
                 }
                 catch (System.Exception ex)
@@ -34,6 +35,32 @@ namespace appointment_checker
                 }          
             }   
         }
+
+        private static async Task ProcessVaccin()
+        {
+            var config = ConfigurationManager.AppSettings;
+            var uri = config["VaccinUri"];
+            var parameters = config["VaccinParameters"];
+            var locations = config["VaccinLocations"].Split(",");
+
+            foreach(var location in locations)
+            {
+                var locationCode = location.Split(":")[0];
+                var locationName = location.Split(":")[1];
+                var url = $"{uri}/search_results/{locationCode}.json?{parameters}";
+                var res = await HttpClientJsonExtensions.GetFromJsonAsync<VaccinResponse>(_client, url);
+
+                if (res != null && res.total > 0 && res.availabilities.Count > 0 && res.search_result != null)
+                {
+                    SendEmailNotification("!! SUCCESS !!", $"{locationName} : {uri}{res.search_result.url}");
+                }
+                else
+                {
+                    Console.WriteLine($"{locationName} => none :(");
+                }
+            }
+        }
+
         private static async Task ProcessCandilib()
         {
             var config = ConfigurationManager.AppSettings;
