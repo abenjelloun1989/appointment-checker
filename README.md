@@ -13,7 +13,7 @@ crond -e <br />
 */1 * * * * docker run -d appointmentchecker:latest > /dev/null <br />
 sudo service cron start <br />
 
-you can also just run the app with a dotnet command : dotnet run [param]
+you can also just run the app with a dotnet command : dotnet run [param] <br />
 param in: [candilib, weeding, vaccin]
 
 For email sender, you will need to use a gmail account with the setting "Less secure apps" enabled : https://support.google.com/accounts/answer/6010255?hl=en
