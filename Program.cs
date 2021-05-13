@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using appointment_checker.models;
+using System.Text.RegularExpressions;
 
 namespace appointment_checker
 {
@@ -41,24 +42,40 @@ namespace appointment_checker
             var config = ConfigurationManager.AppSettings;
             var uri = config["VaccinUri"];
             var parameters = config["VaccinParameters"];
-            var locations = config["VaccinLocations"].Split(",");
+            var searchUrl = config["SearchUrl"];
+            var locationsCodes = await SearchLocationsCodes(searchUrl);
 
-            foreach(var location in locations)
+            foreach (var locationCode in locationsCodes)
             {
-                var locationCode = location.Split(":")[0];
-                var locationName = location.Split(":")[1];
                 var url = $"{uri}/search_results/{locationCode}.json?{parameters}";
                 var res = await HttpClientJsonExtensions.GetFromJsonAsync<VaccinResponse>(_client, url);
 
-                if (res != null && res.total > 0 && res.availabilities.Count > 0 && res.search_result != null)
+                if (res != null)
                 {
-                    SendEmailNotification("!! SUCCESS !!", $"{locationName} : {uri}{res.search_result.url}");
+                    if (res.total > 0 && res.availabilities.Count > 0 && res.search_result != null)
+                    {
+                        SendEmailNotification("!! SUCCESS !!", $"{uri}{res.search_result.url}");
+                    }
+                    else if (res.search_result != null)
+                    {
+                        Console.WriteLine($"{res.search_result.city} => none :(");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"{locationName} => none :(");
+                    Console.WriteLine($"{locationCode} => none :(");
                 }
             }
+        }
+
+        private static async Task<MatchCollection> SearchLocationsCodes(string searchUrl)
+        {
+            var searchLocationsResult = await _client.GetAsync(searchUrl);
+            var searchLocationBody = await searchLocationsResult.Content.ReadAsStringAsync();
+            var template = "(?<=id=\"search-result-)\\d+";
+            var regex = new Regex(@template);
+            var locationsCodes = regex.Matches(searchLocationBody);
+            return locationsCodes;
         }
 
         private static async Task ProcessCandilib()
