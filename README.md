@@ -22,7 +22,7 @@ For email sender, you will need to use a gmail account with the setting "Less se
 BONUS STEP
 
 How to deploy your app on a Raspberry PI: <br/>
-1 - download and install a compatible ubuntu distrib on your SD card that you'll use on your Rpi. <br/>
+1 - download and install a compatible ubuntu distrib on your SD card that you'll use on your Rpi. I personally chose Ubuntu 20.04.2 LTS on my Rpi 4 model B. <br/>
 2 - from you local machine, which could be a WSL, generate a ssh private/pub keys and copy the public one in your Rpi ~/.ssh/authorized_keys file in order to be able to connect to it without any password. ref: https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md <br/>
 3 - install docker on your Rpi. <br/>
 4 - create a docker group on your Rpi and add your current user to that group (you'll need to logout login in order for this to be taken into account) : <br />
