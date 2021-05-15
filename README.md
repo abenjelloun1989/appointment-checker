@@ -32,6 +32,6 @@ How to deploy your app on a Raspberry PI: <br/>
     docker context create remote --docker "host=ssh://<USER>@<IP>" <br/>
 5 - run : "docker context ps" and make sure that the remote context is created <br/>
 6 - in order to set your Rpi as the default context for all your docker command just run : docker context use remote <br/>
-    you can switch back to default if needed
-7 - configure your cron on the rpi as described above.
-7 - enjoy ! ;)
+    you can switch back to default if needed.  <br/>
+7 - configure your cron on the rpi as described above. <br/>
+7 - enjoy ! ;) <br/>
