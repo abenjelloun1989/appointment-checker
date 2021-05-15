@@ -9,10 +9,11 @@ three modes : candilib, wedding and vaccin
 4 - run : docker compose up <br />
 Or run : docker run appointmentchecker:latest <br />
 
-you can configure a cron to run it every x minutes : <br />
+you can configure a cron to run it every x minutes (ref : https://crontab.guru/) : <br />
 crond -e <br />
 */1 * * * * docker run -d appointmentchecker:latest > /dev/null <br />
 sudo service cron start <br />
+
 
 you can also just run the app with a dotnet command : dotnet run [param] <br />
 param in: [candilib, weeding, vaccin]
