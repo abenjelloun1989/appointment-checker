@@ -4,6 +4,7 @@ C# Console app that checks for appointments
 three modes : candilib, wedding and vaccin
 
 1 - enable the appointment you would like to check in /script/startup.sh <br />
+   For vaccin, you can configure two additional parameters which are SearchArea and EmailReceiver. This last parameter overrides the one in App.config.<br />
 2 - modify the email sender and receiver in app.config. For the sender, you will need to use a gmail account with the setting "Less secure apps" enabled : https://support.google.com/accounts/answer/6010255?hl=en <br />
 3 - run : docker compose build --no-cache <br />
 4 - run : docker compose up <br />
