@@ -16,25 +16,37 @@ namespace appointment_checker
     {
         private static readonly HttpClient _client = new HttpClient();
         private static string _context;
+        private static string _searchArea;
+        private static string _emailReceiver;
         public static async Task Main(string[] args)
         {
             if (args.Count() > 0)
             {
-                _context = args[0];
+                ParseArguments(args);
                 try
-                {                    
+                {
                     switch (_context)
                     {
-                        case "candilib" : { await ProcessCandilib(); break; }
-                        case "wedding" : { await ProcessWedding(); break; }
-                        case "vaccin" : { await ProcessVaccin(); break; }
-                    }      
+                        case "candilib": { await ProcessCandilib(); break; }
+                        case "wedding": { await ProcessWedding(); break; }
+                        case "vaccin": { await ProcessVaccin(); break; }
+                    }
                 }
                 catch (System.Exception ex)
                 {
-                    SendEmailNotification("ERROR", ex.Message);
-                }          
-            }   
+                    SendEmailNotification(EmailStatus.Error, ex.Message);
+                }
+            }
+        }
+
+        private static void ParseArguments(string[] args)
+        {
+            _context = args[0];
+            if (args.Count() == 3)
+            {
+                _searchArea = args[1];
+                _emailReceiver = args[2];
+            }
         }
 
         private static async Task ProcessVaccin()
@@ -42,8 +54,9 @@ namespace appointment_checker
             var config = ConfigurationManager.AppSettings;
             var uri = config["VaccinUri"];
             var parameters = config["VaccinParameters"];
-            var searchUrl = config["SearchUrl"];
-            var locationsCodes = await SearchLocationsCodes(searchUrl);
+            var searchArea = _searchArea ?? config["VaccinSearchArea"];
+            var searchUrl = $"{uri}/vaccination-covid-19/{searchArea}?{parameters}";
+            var locationsCodes = await SearchLocationsInArea(searchUrl);
 
             foreach (var locationCode in locationsCodes)
             {
@@ -54,7 +67,7 @@ namespace appointment_checker
                 {
                     if (res.total > 0 && res.availabilities.Count > 0 && res.search_result != null)
                     {
-                        SendEmailNotification("!! SUCCESS !!", $"{uri}{res.search_result.url}");
+                        SendEmailNotification(EmailStatus.Sucess, $"{uri}{res.search_result.url}");
                     }
                     else if (res.search_result != null)
                     {
@@ -68,7 +81,7 @@ namespace appointment_checker
             }
         }
 
-        private static async Task<MatchCollection> SearchLocationsCodes(string searchUrl)
+        private static async Task<MatchCollection> SearchLocationsInArea(string searchUrl)
         {
             var searchLocationsResult = await _client.GetAsync(searchUrl);
             var searchLocationBody = await searchLocationsResult.Content.ReadAsStringAsync();
@@ -96,7 +109,7 @@ namespace appointment_checker
 
                 if (res.Count > 0 && res.Any(r => r.count > 0))
                 {
-                    SendEmailNotification("!! SUCCESS !!", dep);
+                    SendEmailNotification(EmailStatus.Sucess, dep);
                 }
                 else
                 {
@@ -127,7 +140,7 @@ namespace appointment_checker
             var stringContent = await response.Content.ReadAsStringAsync();
             if (stringContent != "[]")
             {
-                SendEmailNotification("!! SUCCESS !!", stringContent);
+                SendEmailNotification(EmailStatus.Sucess, stringContent);
             }
             else
             {       
@@ -141,7 +154,7 @@ namespace appointment_checker
             Console.ReadLine();
         }
 
-        private static void SendEmailNotification(string status, string body)
+        private static void SendEmailNotification(EmailStatus status, string body)
         {
             var config = ConfigurationManager.AppSettings;
             var smtpClient = new SmtpClient("smtp.gmail.com")
@@ -150,12 +163,21 @@ namespace appointment_checker
                 Credentials = new NetworkCredential(config["EmailSender"], config["EmailSenderPassword"]),
                 EnableSsl = true,
             };
+
+            var emailSender = config["EmailSender"];
+            var emailReceiver = _emailReceiver ?? config["EmailReceiver"];
                 
-            smtpClient.Send(config["EmailSender"], 
-                            config["EmailReceiver"],
-                            $"Appointment Checker {_context} : {status}",
+            smtpClient.Send(emailSender, 
+                            status == EmailStatus.Sucess ? emailReceiver : emailSender,
+                            $"Appointment Checker {_context} : {status.ToString("g")}",
                             $"{_context} response : {body}");
 
         }
+    }
+    
+    public enum EmailStatus
+    {
+        Sucess,
+        Error
     }
 }
