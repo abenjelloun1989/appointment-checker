@@ -9,10 +9,13 @@ three modes : candilib, wedding and vaccin
 4 - run : docker compose up <br />
 Or run : docker run appointmentchecker:latest <br />
 
-you can configure a cron to run it every x minutes : <br />
+you can configure a cron to run it every x minutes (ref : https://crontab.guru/) : <br />
 crond -e <br />
-*/1 * * * * docker run -d appointmentchecker:latest > /dev/null <br />
+Add this line if you want it to run every minute 24/24h 7d/7 : */1 * * * * docker run -d appointmentchecker:latest > /dev/null <br />
+OR <br />
+Add this line if you want it to run every minute from 7am to 7pm : */1    07-19        *     * *     docker run -d appointmentchecker:latest > /dev/null <br />
 sudo service cron start <br />
+
 
 you can also just run the app with a dotnet command : dotnet run [param] <br />
 param in: [candilib, weeding, vaccin]
@@ -22,7 +25,7 @@ For email sender, you will need to use a gmail account with the setting "Less se
 BONUS STEP
 
 How to deploy your app on a Raspberry PI: <br/>
-1 - download and install a compatible ubuntu distrib on your SD card that you'll use on your Rpi. <br/>
+1 - download and install a compatible ubuntu distrib on your SD card that you'll use on your Rpi. I personally chose Ubuntu 20.04.2 LTS on my Rpi 4 model B. <br/>
 2 - from you local machine, which could be a WSL, generate a ssh private/pub keys and copy the public one in your Rpi ~/.ssh/authorized_keys file in order to be able to connect to it without any password. ref: https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md <br/>
 3 - install docker on your Rpi. <br/>
 4 - create a docker group on your Rpi and add your current user to that group (you'll need to logout login in order for this to be taken into account) : <br />
