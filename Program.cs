@@ -166,12 +166,14 @@ namespace appointment_checker
 
             var emailSender = config["EmailSender"];
             var emailReceiver = _emailReceiver ?? config["EmailReceiver"];
-                
-            smtpClient.Send(emailSender, 
-                            status == EmailStatus.Sucess ? emailReceiver : emailSender,
-                            $"Appointment Checker {_context} : {status.ToString("g")}",
-                            $"{_context} response : {body}");
 
+            var message = new MailMessage(emailSender,
+                            status == EmailStatus.Sucess ? emailReceiver : emailSender);
+            message.CC.Add(config["EmailReceiver"]);
+            message.Subject = $"Appointment Checker {_context} : {status.ToString("g")}";
+            message.Body = $"{_context} response : {body}";
+                
+            smtpClient.Send(message);
         }
     }
     
