@@ -11,7 +11,9 @@ Or run : docker run appointmentchecker:latest <br />
 
 you can configure a cron to run it every x minutes (ref : https://crontab.guru/) : <br />
 crond -e <br />
-*/1 * * * * docker run -d appointmentchecker:latest > /dev/null <br />
+Add this line if you want it to run every minute 24/24h 7d/7 : */1 * * * * docker run -d appointmentchecker:latest > /dev/null <br />
+OR <br />
+Add this line if you want it to run every minute from 7am to 7pm : */1    07-19        *     * *     docker run -d appointmentchecker:latest > /dev/null <br />
 sudo service cron start <br />
 
 
