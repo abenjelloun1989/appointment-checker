@@ -117,6 +117,7 @@ namespace appointment_checker
                 }
             }
         }
+        
         private static async Task ProcessWedding()
         {
             var config = ConfigurationManager.AppSettings;
@@ -146,12 +147,6 @@ namespace appointment_checker
             {       
                 Console.WriteLine($"=> none :(");
             }
-        }
-        private static void TriggerFound(string param = "")
-        {
-            Console.WriteLine($"{param} => YES !");
-            Console.Beep();
-            Console.ReadLine();
         }
 
         private static void SendEmailNotification(EmailStatus status, string body)
