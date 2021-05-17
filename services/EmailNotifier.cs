@@ -33,7 +33,7 @@ namespace appointment_checker.services
             };
 
             var message = new MailMessage(_emailSender,
-                            status == Status.Sucess ? _emailReceiver : _defaultEmailReceiver);
+                            status == Status.Sucess ? _emailReceiver : _emailSender);
             message.CC.Add(_defaultEmailReceiver);
             message.Subject = $"Appointment Checker {_context.ToString("g")} : {status.ToString("g")}";
             message.Body = $"{_context} response : {body}";

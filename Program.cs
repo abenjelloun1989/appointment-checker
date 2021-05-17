@@ -60,6 +60,9 @@ namespace appointment_checker
             var uri = config["VaccinUri"];
             var parameters = config["VaccinParameters"];
             var searchArea = _searchArea ?? config["VaccinSearchArea"];
+            var vaccinBlackListLocations = config["VaccinBlackListLocations"]
+                                            .Split(";")
+                                            .Select(b => Int32.Parse(b)).ToList();
             var searchUrl = $"{uri}/vaccination-covid-19/{searchArea}?{parameters}";
             var locationsCodes = await SearchLocationsInArea(searchUrl);
 
@@ -70,7 +73,7 @@ namespace appointment_checker
 
                 if (res != null)
                 {
-                    if (res.total > 0 && res.availabilities.Count > 0 && res.search_result != null)
+                    if (ResponseIsValid(res, vaccinBlackListLocations))
                     {
                         _notifier.Notify(Status.Sucess, $"{uri}{res.search_result.url}");
                     }
@@ -84,6 +87,13 @@ namespace appointment_checker
                     Console.WriteLine($"{locationCode} => none :(");
                 }
             }
+        }
+
+        private static bool ResponseIsValid(VaccinResponse res, List<int> vaccinBlackListLocations)
+        {
+            return res.total > 0 && res.availabilities.Count > 0 
+                    && res.search_result != null 
+                    && !vaccinBlackListLocations.Contains(res.search_result.profile_id);
         }
 
         private static async Task<MatchCollection> SearchLocationsInArea(string searchUrl)
