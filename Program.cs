@@ -9,44 +9,49 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using appointment_checker.models;
 using System.Text.RegularExpressions;
+using appointment_checker.services;
 
 namespace appointment_checker
 {
     class Program
     {
         private static readonly HttpClient _client = new HttpClient();
-        private static string _context;
+        private static ServicesEnum _context;
         private static string _searchArea;
-        private static string _emailReceiver;
+        private static INotifier _notifier;
         public static async Task Main(string[] args)
         {
-            if (args.Count() > 0)
+            if (args.Length > 0)
             {
-                ParseArguments(args);
                 try
                 {
+                    _context = Enum.Parse<ServicesEnum>(args[0]);
+                    _searchArea = args.Length > 1 ? args[1] : null;
+                    InitializeNotifier(args.Length > 2 ? args[2] : null);
+
                     switch (_context)
                     {
-                        case "candilib": { await ProcessCandilib(); break; }
-                        case "wedding": { await ProcessWedding(); break; }
-                        case "vaccin": { await ProcessVaccin(); break; }
+                        case ServicesEnum.candilib: { await ProcessCandilib(); break; }
+                        case ServicesEnum.wedding: { await ProcessWedding(); break; }
+                        case ServicesEnum.vaccin: { await ProcessVaccin(); break; }
                     }
                 }
                 catch (System.Exception ex)
                 {
-                    SendEmailNotification(EmailStatus.Error, ex.Message);
+                    _notifier.Notify(Status.Error, ex.Message);
                 }
             }
         }
 
-        private static void ParseArguments(string[] args)
+        private static void InitializeNotifier(string defaultEmailReceiver)
         {
-            _context = args[0];
-            if (args.Count() == 3)
-            {
-                _searchArea = args[1];
-                _emailReceiver = args[2];
-            }
+            var config = ConfigurationManager.AppSettings;
+
+            _notifier = new EmailNotifier(_context,
+                                        config["EmailSender"],
+                                        config["EmailSenderPassword"],
+                                        config["EmailReceiver"],
+                                        defaultEmailReceiver);
         }
 
         private static async Task ProcessVaccin()
@@ -67,7 +72,7 @@ namespace appointment_checker
                 {
                     if (res.total > 0 && res.availabilities.Count > 0 && res.search_result != null)
                     {
-                        SendEmailNotification(EmailStatus.Sucess, $"{uri}{res.search_result.url}");
+                        _notifier.Notify(Status.Sucess, $"{uri}{res.search_result.url}");
                     }
                     else if (res.search_result != null)
                     {
@@ -109,7 +114,7 @@ namespace appointment_checker
 
                 if (res.Count > 0 && res.Any(r => r.count > 0))
                 {
-                    SendEmailNotification(EmailStatus.Sucess, dep);
+                    _notifier.Notify(Status.Sucess, dep);
                 }
                 else
                 {
@@ -141,40 +146,12 @@ namespace appointment_checker
             var stringContent = await response.Content.ReadAsStringAsync();
             if (stringContent != "[]")
             {
-                SendEmailNotification(EmailStatus.Sucess, stringContent);
+                _notifier.Notify(Status.Sucess, stringContent);
             }
             else
             {       
                 Console.WriteLine($"=> none :(");
             }
         }
-
-        private static void SendEmailNotification(EmailStatus status, string body)
-        {
-            var config = ConfigurationManager.AppSettings;
-            var smtpClient = new SmtpClient("smtp.gmail.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential(config["EmailSender"], config["EmailSenderPassword"]),
-                EnableSsl = true,
-            };
-
-            var emailSender = config["EmailSender"];
-            var emailReceiver = _emailReceiver ?? config["EmailReceiver"];
-
-            var message = new MailMessage(emailSender,
-                            status == EmailStatus.Sucess ? emailReceiver : emailSender);
-            message.CC.Add(config["EmailReceiver"]);
-            message.Subject = $"Appointment Checker {_context} : {status.ToString("g")}";
-            message.Body = $"{_context} response : {body}";
-                
-            smtpClient.Send(message);
-        }
-    }
-    
-    public enum EmailStatus
-    {
-        Sucess,
-        Error
     }
 }
