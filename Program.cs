@@ -43,15 +43,15 @@ namespace appointment_checker
             }
         }
 
-        private static void InitializeNotifier(string defaultEmailReceiver)
+        private static void InitializeNotifier(string emailReceiver)
         {
             var config = ConfigurationManager.AppSettings;
 
             _notifier = new EmailNotifier(_context,
                                         config["EmailSender"],
                                         config["EmailSenderPassword"],
-                                        config["EmailReceiver"],
-                                        defaultEmailReceiver);
+                                        emailReceiver,
+                                        config["DefaultEmailReceiver"]);
         }
 
         private static async Task ProcessVaccin()
