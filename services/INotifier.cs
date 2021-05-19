@@ -4,6 +4,6 @@ namespace appointment_checker.services
 {
     public interface INotifier
     {
-        void Notify(Status status, string body);
+        void Notify(Status status, string subject, string body);
     }
 }

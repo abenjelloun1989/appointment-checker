@@ -38,7 +38,7 @@ namespace appointment_checker
                 }
                 catch (System.Exception ex)
                 {
-                    _notifier.Notify(Status.Error, ex.Message);
+                    _notifier.Notify(Status.Error, string.Empty, ex.Message);
                 }
             }
         }
@@ -75,7 +75,8 @@ namespace appointment_checker
                 {
                     if (ResponseIsValid(res, vaccinBlackListLocations))
                     {
-                        _notifier.Notify(Status.Sucess, $"{uri}{res.search_result.url}");
+                        Console.WriteLine($"{res.search_result.city} => YES !");
+                        _notifier.Notify(Status.Sucess, res.search_result.city, $"{uri}{res.search_result.url}");
                     }
                     else if (res.search_result != null)
                     {
@@ -124,7 +125,7 @@ namespace appointment_checker
 
                 if (res.Count > 0 && res.Any(r => r.count > 0))
                 {
-                    _notifier.Notify(Status.Sucess, dep);
+                    _notifier.Notify(Status.Sucess, dep, dep);
                 }
                 else
                 {
@@ -156,7 +157,7 @@ namespace appointment_checker
             var stringContent = await response.Content.ReadAsStringAsync();
             if (stringContent != "[]")
             {
-                _notifier.Notify(Status.Sucess, stringContent);
+                _notifier.Notify(Status.Sucess, "wedding", stringContent);
             }
             else
             {       

@@ -22,7 +22,7 @@ namespace appointment_checker.services
             _defaultEmailReceiver = defaultEmailReceiver;
         }
 
-        public void Notify(Status status, string body)
+        public void Notify(Status status, string subject, string body)
         {
             var smtpClient = new SmtpClient("smtp.gmail.com")
             {
@@ -35,8 +35,8 @@ namespace appointment_checker.services
             var message = new MailMessage(_emailSender,
                             status == Status.Sucess ? _emailReceiver : _emailSender);
             message.CC.Add(_defaultEmailReceiver);
-            message.Subject = $"Appointment Checker {_context.ToString("g")} : {status.ToString("g")}";
-            message.Body = $"{_context} response : {body}";
+            message.Subject = $"Rendez-vous {_context.ToString("g")} trouvé : {subject}";
+            message.Body = $"Lien : {body}";
                 
             smtpClient.Send(message);
         }
