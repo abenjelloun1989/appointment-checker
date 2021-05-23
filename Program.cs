@@ -136,6 +136,7 @@ namespace appointment_checker
         
         private static async Task ProcessWedding()
         {
+            var blackListedIds = new string[] {"1625842800R141cc6c3-cbc1-4dff-8aa7-0ac268a385de"};
             var config = ConfigurationManager.AppSettings;
             var uri = config["WeddingUri"];
             var dt = DateTime.Now;
@@ -154,15 +155,29 @@ namespace appointment_checker
             });
 
             var response = await _client.PostAsync(uri, formContent);
-            var stringContent = await response.Content.ReadAsStringAsync();
-            if (stringContent != "[]")
+            var parsedResponse = await response.Content.ReadFromJsonAsync<WeddingResponse>();
+            if (parsedResponse != null && parsedResponse.creneaux.Count() > 0)
             {
-                _notifier.Notify(Status.Sucess, "wedding", stringContent);
+                for (int i = 0; i < parsedResponse.creneaux.Length; i++)
+                {
+                    Creneau creneau = parsedResponse.creneaux[i];
+                    if(!blackListedIds.Contains(creneau.id))
+                    {
+                        var startDateTime = ConvertFromUnixTimestamp(double.Parse(creneau.start));
+                        _notifier.Notify(Status.Sucess, "wedding", $"Créneau n°{i+1} trouvé le : {startDateTime}");
+                    }              
+                }
             }
             else
             {       
                 Console.WriteLine($"=> none :(");
             }
+        }
+
+        private static DateTime ConvertFromUnixTimestamp(double timestamp)
+        {
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return origin.AddSeconds(timestamp);
         }
     }
 }
