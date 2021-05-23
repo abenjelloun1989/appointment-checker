@@ -2,10 +2,9 @@
 using System.Configuration;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Net.Mail;
+using System.Text;
 using System.Threading.Tasks;
 using appointment_checker.models;
 using System.Text.RegularExpressions;
@@ -136,7 +135,8 @@ namespace appointment_checker
         
         private static async Task ProcessWedding()
         {
-            var blackListedIds = new string[] {"1625842800R141cc6c3-cbc1-4dff-8aa7-0ac268a385de"};
+            var blackListedIds = new string[] {"1625842800R141cc6c3-cbc1-4dff-8aa7-0ac268a385de",
+                                               "1626096600R6abdc24e-0a7d-48ca-8c3c-7e2288c1681d"};
             var config = ConfigurationManager.AppSettings;
             var uri = config["WeddingUri"];
             var dt = DateTime.Now;
@@ -158,14 +158,20 @@ namespace appointment_checker
             var parsedResponse = await response.Content.ReadFromJsonAsync<WeddingResponse>();
             if (parsedResponse != null && parsedResponse.creneaux.Count() > 0)
             {
+                var results = new List<string>();
                 for (int i = 0; i < parsedResponse.creneaux.Length; i++)
                 {
                     Creneau creneau = parsedResponse.creneaux[i];
                     if(!blackListedIds.Contains(creneau.id))
                     {
                         var startDateTime = ConvertFromUnixTimestamp(double.Parse(creneau.start));
-                        _notifier.Notify(Status.Sucess, "wedding", $"Créneau n°{i+1} trouvé le : {startDateTime}");
+                        results.Add($"Créneau '{creneau.id}' trouvé le : {startDateTime}");
                     }              
+                }
+
+                if(results.Any())
+                {
+                    _notifier.Notify(Status.Sucess, "wedding", string.Join("\n", results));
                 }
             }
             else
