@@ -136,7 +136,8 @@ namespace appointment_checker
         private static async Task ProcessWedding()
         {
             var blackListedIds = new string[] {"1625842800R141cc6c3-cbc1-4dff-8aa7-0ac268a385de",
-                                               "1626096600R6abdc24e-0a7d-48ca-8c3c-7e2288c1681d"};
+                                               "1626096600R6abdc24e-0a7d-48ca-8c3c-7e2288c1681d",
+                                               "1626102000R85523603-22db-480f-946c-d95cc59d3980"};
             var config = ConfigurationManager.AppSettings;
             var uri = config["WeddingUri"];
             var dt = DateTime.Now;
@@ -165,7 +166,7 @@ namespace appointment_checker
                     if(!blackListedIds.Contains(creneau.id))
                     {
                         var startDateTime = ConvertFromUnixTimestamp(double.Parse(creneau.start));
-                        results.Add($"Créneau '{creneau.id}' trouvé le : {startDateTime}");
+                        results.Add($"Créneau '{creneau.id}' trouvé le : {startDateTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss")}");
                     }              
                 }
 

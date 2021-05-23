@@ -18,7 +18,7 @@ namespace appointment_checker.services
             _context = context;
             _emailSender = emailSender;
             _emailSenderPassword = emailSenderPassword;
-            _emailReceiver = emailReceiver;
+            _emailReceiver = emailReceiver ?? defaultEmailReceiver;
             _defaultEmailReceiver = defaultEmailReceiver;
         }
 
@@ -34,7 +34,10 @@ namespace appointment_checker.services
 
             var message = new MailMessage(_emailSender,
                             status == Status.Sucess ? _emailReceiver : _emailSender);
-            message.CC.Add(_defaultEmailReceiver);
+            if(_defaultEmailReceiver != null)
+            {
+                message.CC.Add(_defaultEmailReceiver);
+            }
             message.Subject = $"Rendez-vous {_context.ToString("g")} trouvé : {subject}";
             message.Body = $"Lien : {body}";
                 
